@@ -145,12 +145,10 @@ fun LinkCard(link: MergedLink) {
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(vertical = 8.dp),
-                    colors = OutlinedButtonDefaults.outlinedButtonColors(
+                    colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.primary
                     ),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
-                        width = 1.dp
-                    )
+                    border = ButtonDefaults.outlinedButtonBorder
                 ) {
                     Icon(
                         Icons.Default.ContentCopy,
