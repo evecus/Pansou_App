@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- P 字母 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M28,20 L28,88 L40,88 L40,62 L58,62
+            C72,62 80,54 80,44 C80,34 72,20 58,20 Z
+            M40,32 L56,32 C64,32 68,36 68,44 C68,52 64,52 56,52 L40,52 Z"/>
+
+    <!-- 放大镜圆圈 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M68,56 m-14,0 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0"/>
+    <path
+        android:fillColor="#3A7ED4"
+        android:pathData="M68,56 m-10,0 a10,10 0 1,0 20,0 a10,10 0 1,0 -20,0"/>
+
+    <!-- 放大镜把手 -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M78,66 L90,78"/>
+</vector>
