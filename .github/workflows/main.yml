@@ -1,0 +1,92 @@
+name: Build & Release APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v1.0.0)'
+        required: true
+        type: string
+      release_notes:
+        description: 'Release notes'
+        required: false
+        default: '新版本发布'
+        type: string
+
+jobs:
+  build:
+    name: Build arm64 Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > $GITHUB_WORKSPACE/release.jks
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build Release APK
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          ./gradlew assembleRelease \
+            -PversionName=${{ github.event.inputs.tag }} \
+            --no-daemon \
+            --stacktrace
+
+      - name: Locate APK
+        id: locate_apk
+        run: |
+          APK_PATH=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
+          echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+          # Rename to friendly name
+          NEW_NAME="盘搜-${{ github.event.inputs.tag }}-arm64.apk"
+          cp "$APK_PATH" "$NEW_NAME"
+          echo "apk_name=$NEW_NAME" >> $GITHUB_OUTPUT
+          echo "APK found: $APK_PATH"
+          ls -lh "$APK_PATH"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          name: 盘搜 ${{ github.event.inputs.tag }}
+          body: |
+            ## 盘搜 ${{ github.event.inputs.tag }}
+
+            ${{ github.event.inputs.release_notes }}
+
+            ### 安装说明
+            - 仅支持 **arm64-v8a** 架构（绝大多数现代安卓手机）
+            - 安装前请在设置中允许「未知来源」应用安装
+            - 安装后在设置页填写你的 PanSou 服务器地址
+
+            ### 架构
+            | 文件 | 架构 |
+            |------|------|
+            | `盘搜-${{ github.event.inputs.tag }}-arm64.apk` | arm64-v8a |
+          files: 盘搜-${{ github.event.inputs.tag }}-arm64.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clean up keystore
+        if: always()
+        run: rm -f $GITHUB_WORKSPACE/release.jks
